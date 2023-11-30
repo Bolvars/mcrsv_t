@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/api_gateway.conf:/etc/nginx/conf.d/api_gateway.conf:ro
+
+  rabbitmq:
+    image: rabbitmq:3.12
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  fluentd:
+    image: fluentd
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    volumes:
+    - ./fluent:/fluentd/etc:rw
+
+  microservice1:
+    build: microservice1
+    ports:
+      - "8081:8081"
+    depends_on:
+      - rabbitmq
+      - fluentd
+
+  microservice2:
+    build: microservice2
+    ports:
+      - "8082:8082"
+    depends_on:
+      - rabbitmq
+      - fluentd
+
+
+
